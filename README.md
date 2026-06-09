@@ -27,7 +27,7 @@ Update K8s Manifest ✅
 | Containerization | Docker |
 | Container Registry | Docker Hub |
 | Orchestration | Kubernetes (K8s Manifests) |
-| Cloud | AWS EC2 (Ubuntu 22.04) |
+| Cloud | AWS EC2 (Ubuntu 26.04) |
 | Version Control | Git, GitHub |
 
 ---
