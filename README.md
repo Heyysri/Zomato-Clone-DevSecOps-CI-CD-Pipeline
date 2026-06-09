@@ -65,7 +65,7 @@ Zomato-Clone/
 
 ### Phase 1 — AWS EC2 Setup
 
-- Launched EC2 instance (Ubuntu 22.04, c7i-flex.large)
+- Launched EC2 instance (Ubuntu 26.04, c7i-flex.large)
 - Configured Security Group with the following ports:
 
 | Port | Service |
