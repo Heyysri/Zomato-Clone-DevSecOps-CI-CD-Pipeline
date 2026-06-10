@@ -315,7 +315,7 @@ Access app: `http://<EXTERNAL-IP>` ✅
 ![Security-Group](screenshots/security-group.png)
 
 ## Jenkins Pipeline Success
-![Pipeline Success](screenshots/Pipeline-success.png
+![Pipeline Success](screenshots/Pipeline-success.png)
 
 ## Jenkins Console logs Success
 ![Logs Success](screenshots/Logs-success.png)
