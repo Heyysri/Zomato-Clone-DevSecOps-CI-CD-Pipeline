@@ -196,7 +196,7 @@ In Jenkins:
 - Branch: `main`
 - Script Path: `Jenkinsfile`
 - Click **Build Now**
-# Before Hitting Build Now replace the Docker-Hub-Username, Git-Username & Git-EMail in the Jenkinsfile and also Docker-Hub-Username in k8s/deployment.yml
+-# Before Hitting Build Now replace the Docker-Hub-Username, Git-Username & Git-EMail in the Jenkinsfile and also Docker-Hub-Username in k8s/deployment.yml
 ### Pipeline Stages
 
 ```
