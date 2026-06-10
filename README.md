@@ -6,16 +6,7 @@ A Zomato Clone web application deployed using a fully automated DevSecOps CI/CD 
 
 # 🏗️ Architecture & Project Structure
 
-```
-Code Push → GitHub → Jenkins →
-SonarQube (Code Quality) → Quality Gate →
-Trivy (File Scan) → Docker Build →
-Trivy (Image Scan) → Docker Hub →
-K8s Manifest Update → Argo CD →
-AWS EKS Deployment ✅
-```
-
----
+![Architecture Diagram](screenshots/diagram.png)
 
 # 🛠️ Tech Stack
 
