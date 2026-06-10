@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: zomato-clone
-        image: arca9/zomato-clone:1
+        image: <DOCKER-HUB-USERNAME>/zomato-clone:1
         ports:
         - containerPort: 3000
 ---
