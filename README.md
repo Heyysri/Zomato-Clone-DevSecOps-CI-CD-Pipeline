@@ -51,14 +51,22 @@ Zomato-Clone-DevSecOps-CI-CD-Pipeline/
 │   │   └── RestaurantCard.css
 │   ├── App.js
 │   ├── App.css
-│   └── index.js
+│   ├── App.test.js
+│   ├── index.js
+│   ├── index.css
+│   ├── App.css
+│   ├── logo.svg
+│   ├── reportWebVitals.js
+│   ├── setupTests.js
 ├── k8s/
 │   └── deployment.yml
 ├── Dockerfile
 ├── Jenkinsfile
 ├── sonar-project.properties
+├── package-lock.json
 ├── package.json
-└── README.md
+├── .gitignore
+├── README.md
 ```
 
 ---
