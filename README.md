@@ -308,7 +308,16 @@ Access app: `http://<EXTERNAL-IP>` ✅
 
 # 📸 Screenshots
 
+## EC2 Instance
+> *(Add screenshot here)*
+
+## Security Group
+> *(Add screenshot here)*
+
 ## Jenkins Pipeline Success
+> *(Add screenshot here)*
+
+## Jenkins Console logs Success
 > *(Add screenshot here)*
 
 ## SonarQube Quality Gate Passed
@@ -330,19 +339,8 @@ Access app: `http://<EXTERNAL-IP>` ✅
 ```
 Zomato-Clone-DevSecOps-CI-CD-Pipeline/
 ├── src/
-│   └── components/
-│   |   ├── Navbar.js / Navbar.css
-│   |   ├── Hero.js / Hero.css
-│   |   ├── RestaurantList.js / RestaurantList.css
-│   |   ├── RestaurantCard.js / RestaurantCard.css
-|   ├── App.js / App.css / App.test.js
-|   ├── index.js / index.css
-|   ├── logo.svg
-|   ├── reportWebVitals.js
-|   ├── setupTests.js
 ├── public/
 ├── k8s/
-│   └── deployment.yml
 ├── Dockerfile
 ├── Jenkinsfile
 ├── sonar-project.properties
