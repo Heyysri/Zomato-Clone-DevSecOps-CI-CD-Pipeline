@@ -50,7 +50,7 @@ AWS EKS Deployment ✅
 
 | SG Name | Inbound Rules |
 |---------|--------------|
-| jenkins-sg | Port 22 (SSH), Port 8080 (Jenkins), Port 9000 (SonarQube), Port 3000 (App), Port 80 (HTTP) |
+| Boom | Port 22 (SSH), Port 8080 (Jenkins), Port 9000 (SonarQube), Port 443 (HTTPS), Port 80 (HTTP) |
 
 ---
 
@@ -58,7 +58,6 @@ AWS EKS Deployment ✅
 
 ## Prerequisites
 
-- AWS Account with IAM user (AdministratorAccess)
 - EC2 Key Pair
 - GitHub Account with Personal Access Token
 - DockerHub Account with Read/Write Token
@@ -70,7 +69,7 @@ AWS EKS Deployment ✅
 - AMI: Ubuntu 26.04 LTS
 - Instance Type: c7i-flex.large
 - Storage: 30 GB
-- Open Security Group ports: 22, 8080, 9000, 3000, 80
+- Open Security Group ports: 22, 8080, 9000, 443, 80
 
 ---
 
@@ -84,37 +83,18 @@ java -version
 
 ---
 
-## 3️⃣ Install Jenkins (WAR file)
+## 3️⃣ Install Jenkins 
 
 ```bash
-wget https://get.jenkins.io/war-stable/latest/jenkins.war
-java -jar jenkins.war --httpPort=8080 &
-```
-
-Create Jenkins as a background service:
-
-```bash
-sudo nano /etc/systemd/system/jenkins.service
-```
-
-```ini
-[Unit]
-Description=Jenkins Server
-After=network.target
-
-[Service]
-User=ubuntu
-ExecStart=/usr/bin/java -jar /home/ubuntu/jenkins.war --httpPort=8080
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl start jenkins
-sudo systemctl enable jenkins
+sudo wget -O /etc/apt/keyrings/jenkins-keyring.asc \
+  https://pkg.jenkins.io/debian-stable/jenkins.io-2026.key
+echo "deb [signed-by=/etc/apt/keyrings/jenkins-keyring.asc]" \
+  https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
+  /etc/apt/sources.list.d/jenkins.list > /dev/null
+sudo apt install jenkins
+systemctl start jenkins
+systemctl enable jenkins
+systemctl status jenkins
 ```
 
 Get admin password:
@@ -143,12 +123,7 @@ sudo chmod 777 /var/run/docker.sock
 ## 5️⃣ Install SonarQube
 
 ```bash
-sudo sysctl -w vm.max_map_count=262144
-echo "vm.max_map_count=262144" | sudo tee -a /etc/sysctl.conf
-
-docker run -d --name sonar \
-  -p 9000:9000 \
-  sonarqube:lts-community
+docker run -d --name sonar -p 9000:9000 sonarqube:lts-community
 ```
 
 Access SonarQube: `http://<EC2-PUBLIC-IP>:9000`
@@ -160,16 +135,11 @@ Access SonarQube: `http://<EC2-PUBLIC-IP>:9000`
 ## 6️⃣ Install Trivy
 
 ```bash
-wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key \
-  | sudo gpg --dearmor \
-  | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
-
-echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] \
-  https://aquasecurity.github.io/trivy-repo/deb generic main" \
-  | sudo tee /etc/apt/sources.list.d/trivy.list
-
-sudo apt update && sudo apt install trivy -y
-trivy --version
+sudo apt-get install wget gnupg
+wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+sudo apt-get update
+sudo apt-get install trivy
 ```
 
 ---
@@ -177,6 +147,7 @@ trivy --version
 ## 7️⃣ Configure Jenkins
 
 ### Plugins to Install
+- Stage View
 - NodeJS
 - SonarQube Scanner
 - Docker & Docker Pipeline
@@ -243,33 +214,43 @@ In Jenkins:
 
 ---
 
-## 9️⃣ Create AWS EKS Cluster
+## 9️⃣ Create AWS EKS Cluster through AWS Terminal
 
 ```bash
 # Install kubectl
-sudo snap install kubectl --classic
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+chmod +x kubectl
+mkdir -p ~/.local/bin
+mv ./kubectl ~/.local/bin/kubectl
+kubectl version --client
 
 # Install eksctl
-curl --silent --location \
-  "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" \
-  | tar xz -C /tmp && sudo mv /tmp/eksctl /usr/local/bin
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+sudo mv /tmp/eksctl /usr/local/bin
+eksctl version
+
+# Install AWS CLI
+sudo apt install unzip -y
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 
 # Configure AWS CLI
-sudo apt install awscli -y
 aws configure
 
-# Create cluster
+# Create cluster using eksctl
 eksctl create cluster \
   --name eks-zomato \
   --region eu-north-1 \
   --version 1.31 \
   --nodegroup-name linux-nodes \
-  --node-type t3.medium \
+  --node-type c7i-flex.large  \
   --nodes 2
 
-# Update kubeconfig
+# Log in to Cluster
 aws eks update-kubeconfig --name eks-zomato
-kubectl get nodes
+
 ```
 
 ---
@@ -350,10 +331,15 @@ Access app: `http://<EXTERNAL-IP>` ✅
 Zomato-Clone-DevSecOps-CI-CD-Pipeline/
 ├── src/
 │   └── components/
-│       ├── Navbar.js / Navbar.css
-│       ├── Hero.js / Hero.css
-│       ├── RestaurantList.js / RestaurantList.css
-│       └── RestaurantCard.js / RestaurantCard.css
+│   |   ├── Navbar.js / Navbar.css
+│   |   ├── Hero.js / Hero.css
+│   |   ├── RestaurantList.js / RestaurantList.css
+│   |   ├── RestaurantCard.js / RestaurantCard.css
+|   ├── App.js / App.css / App.test.js
+|   ├── index.js / index.css
+|   ├── logo.svg
+|   ├── reportWebVitals.js
+|   ├── setupTests.js
 ├── public/
 ├── k8s/
 │   └── deployment.yml
@@ -361,7 +347,9 @@ Zomato-Clone-DevSecOps-CI-CD-Pipeline/
 ├── Jenkinsfile
 ├── sonar-project.properties
 ├── package.json
-└── README.md
+├── package-lock.json
+├── .gitignore
+├── README.md
 ```
 
 ---
